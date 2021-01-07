@@ -8,16 +8,28 @@ const isDev = !isProd
 
 const filename = ext => isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`
 
+const babelOptions = presets => {
+	const opts = {
+		presets: ['@babel/preset-env'],
+		plugins: ['@babel/plugin-proposal-class-properties']
+	}
+	if (presets) {
+		presets.forEach(preset => opts.presets.push(preset))
+	}
+	
+	return opts
+}
+
 module.exports = {
 	context: path.resolve(__dirname, 'src'),
 	mode: 'development',
-	entry: ['@babel/polyfill', './index.js'],
+	entry: './index.tsx',
 	output: {
 		filename: filename('js'),
 		path: path.resolve(__dirname, 'dist')
 	},
 	resolve: {
-		extensions: ['.js'],
+		extensions: ['.ts', '.js', '.tsx'],
 		alias: {
 			'@': path.resolve(__dirname, 'src'),
 		}
@@ -53,8 +65,16 @@ module.exports = {
 					options: {
 						presets: ['@babel/preset-env']
 					}
-				}
-			}
+				},
+			},
+			{
+				test: /\.(ts|js)x?$/,
+				exclude: /node_modules/,
+				loader: {
+					loader: 'babel-loader',
+					options: babelOptions(['@babel/preset-typescript', '@babel/preset-react'])
+				},
+			},
 		]
 	}
 }
